@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<#include "/common/manage-header.html">
+<title>明细页</title>
+</head>
+<body>
+	<br>
+	<br>
+	<br>
+	<div class="container">
+		<div class="row clearfix" style="float: right">
+			<!-- 树 -->
+			<div class="pt-aside pt-aside-border">
+				<div class="pt-tree-title">
+					<span>模型配置</span>
+				</div>
+				<div id="tree"></div>
+			</div>
+		</div>
+		<div id="moxing" style="margin: -200px 0px 0px 130px">
+			<#include "/credit/xygl-modelc/tab.html">
+		</div>
+	</div>
+	<br>
+	<br>
+	<br>
+</body>
+<script>
+	var dataId;
+	var  zhibiaoID;
+	var  mingxiID;
+	
+	var modid;
+	function child(id) {
+		modid = id;
+		  init();
+	  }
+	
+	function init() {
+		$.ajax({
+			type : "Post",
+			url : "api/credit/xygl-model/getTreeM",
+			data: {"model_id":modid},
+			dataType : "json",
+			success : function(result) {
+		        $('#tree').treeview({
+		            data: result,     // data is not optional
+		            icon: "glyphicon glyphicon-stop",
+		            color: "#000000",
+		            backColor: "#FFFFFF",
+		            onhoverColor: '#ccffcc',
+		            //selectable: false,
+		            highlightSelected: false,
+		            state: {
+		                checked: true,
+		                disabled: true,
+		                expanded: true,
+		                selected: true
+		            },
+		            tags: ['available'],
+		            showCheckbox:false,
+		            multiSelect: true,
+//		            uncheckedIcon:"glyphicon glyphicon-unchecked",
+		            showTags:true,
+		            onNodeSelected:function (event, data) {	
+		            	//点击显示tab框，并获取当前id（data.id）
+		            	  dataId = data.id;
+		            	//根据模型明细id获取当前信息
+		            	$.ajax({
+		      			  type: 'POST',
+		      			  url: '/api/credit/xygl-modeldetail/findInforById',
+		      			  dataType: 'json',//设置你收到服务器数据的格式。
+		      			  contentType: 'application/json',//设置你发送给服务器的格式
+		      			  data: dataId ,
+		      			  success: function(result){
+		      				$("#zhibiaomingcheng").empty();
+		      				$("#xiangxishuoming").empty();
+		      				$('#zhibiaoquanzhong').val('');
+		      				$("#zhibiaomingcheng").html(result[0][0]);
+		      				$("#xiangxishuoming").html(result[0][1]);
+		      				$('#zhibiaoquanzhong').val(result[0][2]);
+		      			  },
+		      			});
+		            	 
+		            	 //根据指标id获取当前行的id
+		           	 $.ajax({
+		           			  type: 'POST',
+		           			  url: '/api/credit/xygl-modeldetail/findIdByIndicId',
+		           			  dataType: 'json',//设置你收到服务器数据的格式。
+		           			  contentType: 'application/json',//设置你发送给服务器的格式
+		           			  data: dataId ,
+		           			  success: function(result){
+		           				$("#paramentA").val("");
+		        			  	$("#paramentB").val("");
+		        			  	$("#xminvalue").val("");
+		        			  	$("#xmaxvalue").val("");
+		        			  	$("#gongshi").html("");
+		        			  	$("#quzhi").html("");
+		           				 mingxiID = result[0];
+		           				canshu(mingxiID);
+		           			  },
+		           			});
+		            	 
+		            },
+		            onNodeChecked:nodeChecked ,
+		            onNodeUnchecked:nodeUnchecked,
+
+		        });
+
+		    },
+		    function (error) {
+		        console.log("ERROR")
+		    }
+		})
+				
+		
+		// checkbox checked start
+		    var nodeCheckedSilent = false;
+		    function nodeChecked (event, node){
+		        if(nodeCheckedSilent){
+		            return;
+		        }
+		        nodeCheckedSilent = true;
+		        //checkAllParent(node);
+		        checkAllSon(node);
+		        nodeCheckedSilent = false;
+		    }
+
+		    var nodeUncheckedSilent = false;
+		    function nodeUnchecked  (event, node){
+		        if(nodeUncheckedSilent)
+		            return;
+		        nodeUncheckedSilent = true;
+		        //uncheckAllParent(node);
+		        uncheckAllSon(node);
+		        nodeUncheckedSilent = false;
+		    }
+
+		//选中全部父节点
+		    function checkAllParent(node){
+		        $('#tree').treeview('checkNode',node.nodeId,{silent:true});
+		        var parentNode = $('#tree').treeview('getParent',node.nodeId);
+		        if(!("nodeId" in parentNode)){
+		            return;
+		        }else{
+		            checkAllParent(parentNode);
+		        }
+		    }
+		//取消全部父节点
+
+		    function uncheckAllParent(node){
+		        $('#tree').treeview('uncheckNode',node.nodeId,{silent:true});
+		        var siblings = $('#tree').treeview('getSiblings', node.nodeId);
+		        var parentNode = $('#tree').treeview('getParent',node.nodeId);
+		        if(!("nodeId" in parentNode)) {
+		            return;
+		        }
+		        var isAllUnchecked = true;  //是否全部没选中
+		        for(var i in siblings){
+		            if(siblings[i].state.checked){
+		                isAllUnchecked=false;
+		                break;
+		            }
+		        }
+		        if(isAllUnchecked){
+		            uncheckAllParent(parentNode);
+		        }
+
+		    }
+
+		//级联选中所有子节点
+		    function checkAllSon(node){
+		        $('#tree').treeview('checkNode',node.nodeId,{silent:true});
+		        if(node.nodes!=null&&node.nodes.length>0){
+		            for(var i in node.nodes){
+		                checkAllSon(node.nodes[i]);
+		            }
+		        }
+		    }
+		//级联取消所有子节点
+		    function uncheckAllSon(node){
+		        $('#tree').treeview('uncheckNode',node.nodeId,{silent:true});
+		        if(node.nodes!=null&&node.nodes.length>0){
+		            for(var i in node.nodes){
+		                uncheckAllSon(node.nodes[i]);
+		            }
+		        }
+		    }
+	};
+	
+			function canshu(mingxiID){
+				 $.ajax({
+       			  type: 'POST',
+       			  url: '/api/credit/xygl-modeldetail/findInformationByid',
+       			  dataType: 'json',//设置你收到服务器数据的格式。
+       			  contentType: 'application/json',//设置你发送给服务器的格式
+       			  data: mingxiID ,
+       			  success: function(result){
+       				  if(result.length>0){
+       					/* result[0][0];//参数a
+           				  result[0][1];//参数b
+           				  result[0][2];//x最大值
+           				  result[0][3];//x最小值
+           				  result[0][4];//x等于值
+           				  result[0][5];//计算公式文本描述 
+           				  result[0][6];//指标值公式id*/
+           				  zhibiaoID = result[0][6];
+           				  $('#paramentA').val(result[0][0]);
+           				  $('#paramentB').val(result[0][1]);
+           				  $('#xminvalue').val(result[0][3]);
+           				  $('#xmaxvalue').val(result[0][2]);
+           				  $("#gongshi").html("y="+result[0][0]+"x+"+result[0][1]);
+           				  $("#quzhi").html(result[0][3]+"&ltx&lt"+result[0][2]); 
+       				  }else{
+       					  zhibiaoID = "";
+       				  }
+       				  
+       			  },
+       			});
+		}
+	
+	function save(){
+	//    console.log("node:",$('#tree').treeview('getChecked'));
+	    let nodes= $('#tree').treeview('getChecked');
+	    let nodesArr=[];
+	    for(let i=0;i<nodes.length;i++){
+	        if(nodes[i].id==''||nodes[i].id==undefined){
+	            continue;
+	        }
+	        var test ={};
+	        test.indicateId=nodes[i].id;
+	        test.indicateName=nodes[i].text;
+	        test.parentIndicId=nodes[i].pid;
+	       /*  nodesArr.push(nodes[i].id);
+	        nodesArr.push(nodes[i].text);
+	        nodesArr.push(nodes[i].pid) */
+	        nodesArr.push(test);
+	    }
+		//保存节点形成体系
+		$.ajax({
+			type : "Post",
+			url : "api/credit/xygl-modeldetail/addModel",
+			data : {"objects":nodesArr},
+			dataType : "json",
+			success : function(result) {
+				 if(result.success){
+					  layer.msg("添加成功");
+					 
+				  }else{
+					  layer.msg("添加失败:"+result.msg);
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+             }
+		})
+		
+	}
+	
+	//点击保存按钮,获取参数a，参数b，x最大值，x最小值,保存到数据库
+	function baocunanniu(){
+		if(zhibiaoID=="" || zhibiaoID==null){
+			var paramentA = $("#paramentA").val();
+			var paramentB = $("#paramentB").val();
+			var xminvalue = $("#xminvalue").val();
+			var xmaxvalue = $("#xmaxvalue").val();
+			if(paramentA!="" && paramentB!="" && xminvalue!="" && xmaxvalue!=""){
+				var saveData = {
+						'paramentA':paramentA,
+						'paramentB':paramentB,
+						'xminvalue':xminvalue,
+						'xmaxvalue':xmaxvalue,
+						'mingxiID':mingxiID
+				}
+				$.ajax({
+					  type: 'POST',
+					  url: '/api/credit/xygl-modeldetail/insertData',
+					  contentType: 'application/json',//设置你发送给服务器的格式
+					  data: saveData ,
+					  success: function(res){
+						  if(res=="1"){
+							  canshu(mingxiID);
+							  layer.msg("更新成功");
+							  
+						  }else{
+							  layer.msg("更新失败")
+						  }
+					  },
+					});
+			}else{
+				layer.msg("参数为空")
+			}
+		}else{
+			var paramentA = $("#paramentA").val();
+			var paramentB = $("#paramentB").val();
+			var xminvalue = $("#xminvalue").val();
+			var xmaxvalue = $("#xmaxvalue").val();
+			var saveData = {
+					'paramentA':paramentA,
+					'paramentB':paramentB,
+					'xminvalue':xminvalue,
+					'xmaxvalue':xmaxvalue,
+					'zhibiaoID':zhibiaoID
+			}
+		
+			$.ajax({
+				  type: 'POST',
+				  url: '/api/credit/xygl-modeldetail/updateData',
+				  contentType: 'application/json',//设置你发送给服务器的格式
+				  data: saveData ,
+				  success: function(res){
+					  if(res=="1"){
+						  canshu(mingxiID);
+						  layer.msg("更新成功");
+						  
+					  }else{
+						  layer.msg("更新失败")
+					  }
+				  },
+				}); 
+		}
+	}
+	
+	//tab中点击保存按钮触发事件
+	function Goquanzhong(){
+		//获取input里的数据
+		var inputValue = document.getElementById("zhibiaoquanzhong").value;
+		if(inputValue=="" || inputValue==null){
+			layer.msg("输入为空");
+		}else{
+			var dataJson = {
+					'inputValue':inputValue,
+					'dataId':dataId
+				}
+				//ajax保存到数据库
+				$.ajax({
+					  type: 'POST',
+					  url: '/api/credit/xygl-modeldetail/inserta',
+					  //dataType: 'json',//设置你收到服务器数据的格式。
+					  contentType: 'application/json',//设置你发送给服务器的格式
+					  data: dataJson ,
+					  success: function(res){
+						  if(res=="1"){
+							  layer.msg("保存成功");
+						  }else{
+							  layer.msg("保存失败");
+						  }
+					  },
+					});
+		}
+	}
+</script>
+</html>

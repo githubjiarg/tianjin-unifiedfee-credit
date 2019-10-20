@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/manage-header.html">
+	<script src="${staticUrl}libs/bootstrap-3.3.7-dist/js/bootstrap-table-data.js"></script>
+	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+    <title>列表页</title>
+    <style>
+    	#main{
+    		width:1600px;
+    		height:700px;
+    	}
+    </style>
+</head>
+<body>
+    <div class="pt-page">
+        <!-- 头部条 -->
+ 		<#include "/common/manage-topbar.html">
+        <!-- 头部条  结束 -->
+        <!--页面中间主体部分-->
+        <div class="pt-root-container">
+        	<input type="hidden" id="closeIframe"> 
+            <!--左侧菜单-->
+            <div class="pt-nav pt-open">
+                <!--菜单头部点击条-->
+                <div class="pt-bar" id="pt-bar">
+                    <img src="${staticUrl}src/images/Group15.png" alt="">
+                </div>
+                <!--菜单列表-->
+				<#include "/common/manage-menu.html">
+            </div>
+            <!--左侧菜单 结束-->
+            <!--主视口 -->
+            <div class="pt-view pt-open">
+                <div class="pt-main pt-padding">
+                    <div class="pt-main">
+						<div id="main">
+						
+						</div>
+                    </div>
+                </div>
+
+            </div>
+            <!--主视口 结束-->
+        </div>
+        <!--公共底部-->
+		<#include "/common/manage-footer.html">
+    </div>
+</body>
+<script type="text/javascript">
+    //参数请求地址
+    var baseUrl='credit/xygl-firmportrait';
+    var baseApiUrl='api/'+baseUrl;
+	
+    	
+    	
+</script>
+
+</html>

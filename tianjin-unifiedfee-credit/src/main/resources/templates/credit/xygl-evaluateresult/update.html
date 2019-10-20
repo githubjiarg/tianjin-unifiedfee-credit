@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/update-header.html">
+    <title>编辑页</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <div class="row clearfix">
+    <div class="col-md-12 column">
+      <form id="updateForm" class="form-horizontal pt-form-full" role="form">
+      <input type="hidden" name="id" value="${model.id}" >
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="firmName">企业名称</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="firmName" id="firmName" value="${model.firmName!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="creditShow">信用标识</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="creditShow" id="creditShow" value="${model.creditShow!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="firmCreditcode">社会信用代码</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="firmCreditcode" id="firmCreditcode" value="${model.firmCreditcode!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="evaDesc">评价描述</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="evaDesc" id="evaDesc" value="${model.evaDesc!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="levels">等级</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="levels" id="levels" value="${model.levels!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="evaScore">最终得分</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="evaScore" id="evaScore" value="${model.evaScore!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">评价时间</label>
+          <div class=" col-sm-10 date" id="evaluateTimeContainer" data-date-format="yyyy-mm-dd">
+            <input class="span2 form-control"  name="evaluateTime" id="evaluateTime"  type="text" value="${model.evaluateTime?string('yyyy-MM-dd')}"  readonly="readonly">
+            <span class="add-on"><i class="icon-th"></i></span>
+          </div>
+        </div>
+        <div class="form-group pt-btn-submit">
+        <div class="col-sm-2"></div><!-- 占位2格 -->
+          <button type="submit" class="btn w160 btn-lg btn-default btn-primary">修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<script>
+	//参数请求地址
+	var baseUrl='credit/xygl-evaluateresult';
+	var baseApiUrl='api/'+baseUrl;
+    $(function () {
+        $('#updateForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+            }
+        }).on('success.form.bv', function(e) {
+            submit();
+            e.preventDefault();
+            $('#updateForm').bootstrapValidator('disableSubmitButtons', true);
+        });
+        // 时间选择
+        $('#evaluateTimeContainer').datetimepicker({
+        	minView: "month", //不选择时间
+        	language : 'zh',                 // 语言选择
+        	format : 'yyyy-mm-dd',  // 选择格式
+       		todayBtn : true,
+        	autoclose : true
+        }).on('hide',function(e) {//触发验证
+        	$('#updateForm').data('bootstrapValidator')
+        	.updateStatus('evaluateTime', 'NOT_VALIDATED',null)
+        	.validateField('evaluateTime');
+        });
+    });
+	function submit() {
+		var paramJson = $('#updateForm').serializeJSON();
+        if(paramJson.evaluateTime!=''){
+        	paramJson.evaluateTime=parseInt(new Date(paramJson.evaluateTime).getTime())
+        }else{
+        	paramJson.evaluateTime=null;
+        }
+		$.ajax({
+			  type: 'PUT',
+			  url: baseApiUrl,
+			  data: JSON.stringify(paramJson),
+			  dataType: 'json',
+			  contentType: 'application/json',
+			  success: function(result){
+				  if(result.success){
+					  layer.msg("修改成功");
+					  parent.$("#closeIframe").val("update");
+					  closeLayer(500);
+				  }else{
+					  layer.msg("修改失败:"+result.msg);
+					  $('#updateForm').bootstrapValidator('disableSubmitButtons', false);
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+				  $('#updateForm').bootstrapValidator('disableSubmitButtons', false);
+              }
+		});
+	}
+</script>
+</body>
+</html>

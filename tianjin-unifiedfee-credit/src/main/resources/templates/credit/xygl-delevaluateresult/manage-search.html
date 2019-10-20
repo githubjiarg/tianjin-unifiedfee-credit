@@ -1,0 +1,39 @@
+<!--搜索条-->
+<div class="pt-section-search">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="form-inline">
+                <div class="form-group ">
+                    <label for="xValue">指标X值</label>
+                    <input type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="xValue" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="indicateId">指标id</label>
+                    <input type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="indicateId" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="evaluateId">评价结果id</label>
+                    <input type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="evaluateId" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="indicateName">指标名称</label>
+                    <input type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="indicateName" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="indicateDetailid">指标明细id</label>
+                    <input type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="indicateDetailid" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="parentIndicid">父级指标id</label>
+                    <input type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="parentIndicid" placeholder="">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="refreshTable();" class="btn btn-primary w120">搜索</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 column pt-btn-line">
+        	<button type="button"  onclick="addItem();" class="btn w120 btn-default btn-primary">新增</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+<!--搜索条-->
+<div class="pt-section-search">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="form-inline">
+               <div class="form-group ">
+                    <label for="firmName">企业名称</label>
+                    <input id="qiyemingcheng" type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="firmName" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="firmCreditcode">社会信用代码</label>
+                    <input id="firmCreditcode" type="text" data-condition="eq" class="form-control pt-input-append pt-manage-search" name="firmCreditcode" placeholder="">
+                </div>
+                
+                <div class="form-group " style="display:none;">
+                    <label for="creditShow">信用标识</label>
+                    <input value="信用" id="xinyong" type="hidden" data-condition="like" class="form-control pt-input-append pt-manage-search" name="creditShow" placeholder="">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="refreshTable();" class="btn btn-primary w120">搜索</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 column pt-btn-line" id="btn_add">
+        	<button type="button"  onclick="addItem();" class="btn w120 btn-default btn-primary">新增</button>
+        </div>
+        <div class="col-md-12 column pt-btn-line" style="display:none;" id="btn_retu">
+        	<button type="button"  id="return_to" class="btn w120 btn-default btn-primary">返回</button>
+        </div>
+    </div>
+</div>

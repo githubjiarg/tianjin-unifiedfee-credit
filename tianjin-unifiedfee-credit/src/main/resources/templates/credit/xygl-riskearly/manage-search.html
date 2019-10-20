@@ -1,0 +1,87 @@
+<!--搜索条-->
+<style>
+	.select_search{
+		width: 120px;
+    	height: 35px;
+    	margin: 0 15px;
+    	border: 1px solid #ABC3CF;
+	}
+	.select_option{
+		font-size:12px;
+	}
+</style>
+<div class="pt-section-search">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="form-inline">
+           		<div class="form-group ">
+                    <label for="firmName">企业名称</label>
+                    <input id="firmName" type="text" data-condition="like" class="form-control pt-input-append pt-manage-search" name="firmName" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="firmCreditcode">社会信用代码</label>
+                    <input id="firmCreditcode" type="text" data-condition="eq" class="form-control pt-input-append pt-manage-search" name="firmCreditcode" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="levels">等级</label>
+                    <select id="levels_select" class="select_search" title="请选择">
+                    	
+                    </select>
+                    <input type="hidden" name="levels"  data-condition="eq" class="form-control pt-input-append pt-manage-search"> 
+                </div>
+                <div class="form-group " style="display:none;">
+                    <label for="creditShow">信用标识</label>
+                    <input value="风险" id="xinyong" type="hidden" data-condition="like" class="form-control pt-input-append pt-manage-search" name="creditShow" placeholder="">
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" onclick="refreshTable();" class="btn btn-primary w120">搜索</button>
+                </div>
+            </div>
+        </div>
+        	
+        	<div class="col-md-12 column pt-btn-line" style="display:none;" id="btn_retu">
+        		<button type="button"  id="return_to" class="btn w120 btn-default btn-primary">返回</button>
+        	</div>
+    </div>
+</div>
+<script>
+	
+	//参数请求地址
+	var baseUrl='credit/xygl-dict';
+    var baseApiUrl='api/'+baseUrl;
+	var param = {"category":"风险"};
+	$.ajax({
+		  type: 'POST',
+		  url: baseApiUrl+"/findByType",
+		  async:false,
+		  dataType: 'json',
+		  data:JSON.stringify(param),
+		  contentType: 'application/json',
+		  success: function(result){
+			  var str = "<option class='select_option' value='0'>请选择</option>";
+			  if(result.success){
+				  var i=0;
+				 for(var x = 0;x < result.data.length;x++){
+					 i = x+1;
+					 str+="<option class='select_option' value='"+i+"'>"+result.data[x].queryResoult+"</option>";
+				 }
+			  }
+			  $("#levels_select").html(str);
+		  },
+		  error: function (XMLHttpRequest, textStatus, errorThrown) {
+			  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+		  }
+	});
+	/** 下拉选点击事件 */
+	$("#levels_select").change(function(){
+		
+		var levels = $(this).find("option:selected").text();
+		if( $(this).find("option:selected").val()=='0' ){
+			$("input[name='levels']").val("");
+		} else {
+			$("input[name='levels']").val(levels);
+		}
+	});
+
+</script>

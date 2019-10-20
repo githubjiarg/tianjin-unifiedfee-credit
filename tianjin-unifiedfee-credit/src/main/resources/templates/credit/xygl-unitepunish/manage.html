@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/manage-header.html">
+	<script src="${staticUrl}libs/bootstrap-3.3.7-dist/js/bootstrap-table-data.js"></script>
+    <title>列表页</title>
+</head>
+<body>
+    <div class="pt-page">
+        <!-- 头部条 -->
+ 		<#include "/common/manage-topbar.html">
+        <!-- 头部条  结束 -->
+        <!--页面中间主体部分-->
+        <div class="pt-root-container">
+        	<input type="hidden" id="closeIframe"> 
+            <!--左侧菜单-->
+            <div class="pt-nav pt-open">
+                <!--菜单头部点击条-->
+                <div class="pt-bar" id="pt-bar">
+                    <img src="${staticUrl}src/images/Group15.png" alt="">
+                </div>
+                <!--菜单列表-->
+				<#include "/common/manage-menu.html">
+            </div>
+            <!--左侧菜单 结束-->
+            <!--主视口 -->
+            <div class="pt-view pt-open">
+                <div class="pt-main pt-padding">
+                    <!--搜索条-->
+                    <#include "manage-search.html">
+                    <!--内容区容器-->
+                    <div class="pt-main">
+                        <!--bootstrap 表格-->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-wrap">
+                                    <!--<table id="table_js_2"  ></table>-->
+                                    <table id="tb_info"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--主视口 结束-->
+        </div>
+        <!--公共底部-->
+		<#include "/common/manage-footer.html">
+    </div>
+</body>
+<script type="text/javascript">
+    //参数请求地址
+    var baseUrl='credit/xygl-unitepunish';
+    var baseApiUrl='api/'+baseUrl;
+    //表格表头
+    var columns = [{
+		field: 'firmName',
+		title: '企业名称',
+		sortable: true
+	},{
+		field: 'firmCreditcode',
+		title: '社会统一信用代码',
+		sortable: true
+	},{
+		field: 'evaScore',
+		title: '最终得分',
+		sortable: true
+	},{
+		field: 'levels',
+		title: '等级',
+		sortable: true
+	},{
+		field: 'evaluateTime',
+		title: '评价时间',
+		sortable: true,
+		formatter : function(value, row, index) {
+			if(value!=null){
+				return dateFormat(new Date(value), 'yyyy-MM-dd');
+			}else{
+				return "";
+			}
+		}
+	},{
+        field: 'methods',
+        title: '操作',
+        formatter: operateFormatter
+    }, ];
+    // 操作按钮
+    function operateFormatter(value, row, index) {
+        return [
+        	'<button type="button" class="RoleOflook btn btn-xs btn-default btn-link" onclick="lookItem(\'' + row.id +'\')">查看</button>',
+            '<button type="button" class="RoleOfedit btn btn-xs btn-default btn-link" onclick="findHistorydetail(\'' + row.id +'\')">详情</button>',
+        ].join('');
+    }
+    
+ // 结果详情查看二级列表
+	function findHistorydetail(id){
+		$.ajax({
+			type: 'POST',
+			url: baseApiUrl+"/findHistorydetail",
+			dataType: 'json',
+			data: id,
+			contentType: 'application/json',
+			success: function(result){
+				var dataArray = [];  // table数据集合
+				var resItem = null;  // 单项结果集
+				if(result.success){
+					if(result.data.length==0){
+						return layer.msg("未查到当前企业信息",{icon: 7});
+					}
+					$("#btn_retu").css("display","inline-block"); // 显示返回按钮
+					$("#btn_add").css("display","none");          // 隐藏新增按钮
+					for( var i=0;i<result.data.length;i++){
+						resItem = {
+							"id":result.data[i][3],
+							"firmName":result.data[i][0],
+							"IndicateScore":result.data[i][2],
+							"indicateName":result.data[i][1],
+							
+						};
+						dataArray.push(resItem);
+					}
+					// 重绘表格表头+内容 
+					$("#tb_info").bootstrapTable('destroy').bootstrapTable({
+						pagination: true,
+						data: dataArray,
+						columns:[{
+						field: 'firmName',
+						title: '指标名称',
+						sortable: true
+						},{
+							field: 'indicateName',
+							title: '指标得分',
+							sortable: true
+						},{
+							field: 'IndicateScore',
+							title: '指标X值',
+							sortable: true
+						},{
+							field: 'methods',
+							title: '操作',
+							formatter:function(value, row, index){
+							   return ['<button type="button" class="RoleOflook btn btn-xs btn-default btn-link" onclick="lookItem2(\'' + row.id +'\')" >查看</button>'].join('');
+							}
+						}]
+					});
+				}else{ 
+					layer.msg("获取信息失败" +result.msg);
+				}
+			 },
+			 error: function (XMLHttpRequest, textStatus, errorThrown) {
+				layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+     	  	}
+		});
+	}
+  //查看评价历史详情
+	function lookItem2(id){
+		/* console.log(id); */
+		layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-查看</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['60%', '70%'], //此处可以改为100%，该数值按UI图比例算出
+            content: baseUrl+'/view2/'+id //如果不想出现滚动条['content.html', 'no']
+            
+        });
+	}
+
+    // 删除按钮触发方法
+    function deleteItem(id) {
+		layer.confirm('确认删除？', {
+			btn : [ '确认' ]
+		}, function() {
+			$.ajax({
+			  type: 'DELETE',
+			  url: baseApiUrl+"/"+id,
+			  dataType: 'json',
+			  contentType: 'application/json',
+			  success: function(result){
+				  if(result.success){
+					  layer.msg("删除成功");
+					  refreshTable();
+				  }else{
+					  layer.msg("删除失败:"+result.msg);
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+         	  }
+			});
+		});
+
+		
+    }
+    // 添加按钮触发方法
+    function addItem() {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-添加</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: baseUrl+'/add', //如果不想出现滚动条['content.html', 'no']
+            end:closeIframe
+        });
+    }
+
+    //查看按钮触发方法
+    function lookItem(id) {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-查看</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: baseUrl+'/view/'+id //如果不想出现滚动条['content.html', 'no']
+        });
+    }
+    //Iframe关闭之后的操作
+    function closeIframe(){
+    	var closeIframe = $("#closeIframe").val();
+    	if(closeIframe==''){
+    		return ;
+    	}
+    	$("#closeIframe").val("");
+    	refreshTable();
+    }
+  //刷新table
+	function refreshTable(){
+		$("#btn_retu").css("display","none"); 				      		// 隐藏返回按钮
+		$("#btn_add").css("display","inline-block");              		// 显示新增按钮
+		if ($("#btn_retu").css("display")=="none") {       
+			returnlast();
+		} else {
+			$("#tb_info").bootstrapTable('refresh',{ pageNumber:1});    // 刷新当前页
+		}	
+	}
+	//初始加载数据
+	$(function () {
+		new TableInit().Init(baseApiUrl+'/list', columns);
+	});
+	// 返回上一级
+	$("#btn_retu").click(function(){
+		returnlast();
+	});
+	// 一级列表状态
+	function returnlast(){
+		$("#tb_info").bootstrapTable('destroy');				  // 销毁二级列表
+		$("#btn_retu").css("display","none"); 				      // 隐藏返回按钮
+		$("#btn_add").css("display","inline-block");              // 显示新增按钮
+		new TableInit().Init(baseApiUrl+'/list', columns);
+	}
+</script>
+
+</html>

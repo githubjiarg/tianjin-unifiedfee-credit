@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/add-header.html">
+    <title>添加页</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <div class="row clearfix">
+    <div class="col-md-12 column">
+      <form id="addForm" class="form-horizontal pt-form-full" role="form">
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="xValue">指标X值</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="xValue" id="xValue" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicateScore">指标得分</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="indicateScore" id="indicateScore" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicateId">指标id</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="indicateId" id="indicateId" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="evaluateId">评价结果id</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="evaluateId" id="evaluateId" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicateName">指标名称</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="indicateName" id="indicateName" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicateDetailid">指标明细id</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="indicateDetailid" id="indicateDetailid" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="parentIndicid">父级指标id</label>
+          <div class="col-sm-10">
+            <input maxlength="255" type="text" class="form-control" name="parentIndicid" id="parentIndicid" />
+          </div>
+        </div>
+        <div class="form-group pt-btn-submit">
+        <div class="col-sm-2"></div><!-- 占位2格 -->
+          <button type="submit" class="btn w160 btn-lg btn-default btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<script>
+	//参数请求地址
+	var baseUrl='credit/xygl-delevaluateresult';
+	var baseApiUrl='api/'+baseUrl;
+    $(function () {
+        $('#addForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+            }
+        }).on('success.form.bv', function(e) {
+			submit();
+			e.preventDefault();
+			$('#addForm').bootstrapValidator('disableSubmitButtons', true);
+        });
+    });
+	function submit() {
+		var paramJson = $('#addForm').serializeJSON();
+		$.ajax({
+			  type: 'POST',
+			  url: baseApiUrl,
+			  data: JSON.stringify(paramJson),
+			  dataType: 'json',
+			  contentType: 'application/json',
+			  success: function(result){
+				  if(result.success){
+					  layer.msg("添加成功");
+					  parent.$("#closeIframe").val("add");
+					  closeLayer(500);
+				  }else{
+					  layer.msg("添加失败:"+result.msg);
+					  $('#addForm').bootstrapValidator('disableSubmitButtons', false);
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+				  $('#addForm').bootstrapValidator('disableSubmitButtons', false);
+              }
+		});
+	}
+</script>
+</body>
+</html>

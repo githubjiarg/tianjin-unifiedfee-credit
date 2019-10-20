@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>cn.taiji</groupId>
+		<artifactId>taiji-pom</artifactId>
+		<version>1.0.3-RELEASES</version>
+		<relativePath />
+	</parent>
+	<artifactId>credit-server</artifactId>
+	<name>credit-server</name>
+	<url>http://maven.apache.org</url>
+
+	<profiles>
+		<profile>
+			<id>standard-extra-repos</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+	</profiles>
+	<build>
+		<finalName>credit-server</finalName> 
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!-- 异常处理模块 -->
+		<!--<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-exception</artifactId>
+		</dependency>
+		&lt;!&ndash; 工具包 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-util</artifactId>
+		</dependency>
+		&lt;!&ndash; jpa持久层模块 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-jpa</artifactId>
+		</dependency>
+		&lt;!&ndash; web模块 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-web</artifactId>
+		</dependency>
+		&lt;!&ndash; 服务间调用模块 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-interaction</artifactId>
+		</dependency>
+		&lt;!&ndash; 权限管理模块 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-security</artifactId>
+		</dependency>
+		&lt;!&ndash; 日志模块 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-logging</artifactId>
+		</dependency>
+		&lt;!&ndash; redis缓存 &ndash;&gt;
+		<dependency>
+			<groupId>cn.taiji</groupId>
+			<artifactId>taiji-redis</artifactId>
+		</dependency>
+		&lt;!&ndash; mysql包的配置 &ndash;&gt;
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.39</version>
+		</dependency>
+		&lt;!&ndash; mybatis &ndash;&gt;
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.2.8</version>
+		</dependency>
+		&lt;!&ndash; logback start &ndash;&gt;
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-access</artifactId>
+			<version>1.1.3</version>
+		</dependency>-->
+		<!--<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.3</version>
+		</dependency>-->
+		<!-- logback end -->
+	</dependencies>
+</project>

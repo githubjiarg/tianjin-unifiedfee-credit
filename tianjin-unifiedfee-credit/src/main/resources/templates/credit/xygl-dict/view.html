@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/view-header.html">
+    <title>查看页</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <div class="row clearfix">
+  	<div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">业务类别 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.category!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">起始分值 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.startnum!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">结束分值 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.endnum!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">查询结果 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.queryResoult!}</div>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+</body>
+</html>

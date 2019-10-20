@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/update-header.html">
+    <title>编辑页</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <div class="row clearfix">
+    <div class="col-md-12 column">
+      <form id="updateForm" class="form-horizontal pt-form-full" role="form">
+      <input type="hidden" name="id" value="${model.id}" >
+      	<div class="form-group">
+          <label class="col-sm-2 control-label" for="indicName">指标名称</label>
+          <div class="col-sm-10">
+            <input maxlength="50" type="text" class="form-control" name="indicName" id="indicName" value="${model.indicName!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicGrade">指标级别</label>
+          <div class="col-sm-10">
+          	<select id="indic"   onchange="jibie(this)" class="selectpicker" data-live-search="false" title="请选择"  >
+          			<option value="0">一级</option>
+          			<option value="1">二级</option>
+          	</select>
+          	<input maxlength="255" type="hidden" class="form-control" name="indicGrade" id="indicGrade" value="${model.indicGrade!}" />
+            <!-- <input maxlength="4" type="text" class="form-control" name="indicGrade" id="indicGrade" value="${model.indicGrade!}" /> -->
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="parentId">父级指标</label>
+          <div class="col-sm-10">
+          	<select id="fjzb"  class="selectpicker" data-live-search="false" onchange="selectOnchang(this)" >
+          	
+          	</select>
+          	<input maxlength="255" type="hidden" class="form-control" name="parentId" id="parentId" value="${model.parentId!}" />
+            <!-- <input maxlength="32" type="text" class="form-control" name="parentId" id="parentId" value="${model.parentId!}" /> -->
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="dataSource">数据来源</label>
+          <div class="col-sm-10">
+            <input maxlength="100" type="text" class="form-control" name="dataSource" id="dataSource" value="${model.dataSource!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicDesc">指标描述</label>
+          <div class="col-sm-10">
+            <input maxlength="200" type="text" class="form-control" name="indicDesc" id="indicDesc" value="${model.indicDesc!}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="indicScript">计算x脚本</label>
+          <div class="col-sm-10">
+            <input maxlength="2000" type="text" class="form-control" name="indicScript" id="indicScript" value="${model.indicScript!}" />
+          </div>
+        </div>
+        <div class="form-group pt-btn-submit">
+        <div class="col-sm-2"></div><!-- 占位2格 -->
+          <button type="submit" class="btn w160 btn-lg btn-default btn-primary">修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<script>
+	//参数请求地址
+	var baseUrl='credit/xygl-indicators';
+	var baseApiUrl='api/'+baseUrl;
+    $(function () {
+        $('#updateForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+            }
+        }).on('success.form.bv', function(e) {
+            submit();
+            e.preventDefault();
+            $('#updateForm').bootstrapValidator('disableSubmitButtons', true);
+        });
+    });
+	function submit() {
+		var paramJson = $('#updateForm').serializeJSON();
+		$.ajax({
+			  type: 'PUT',
+			  url: baseApiUrl,
+			  data: JSON.stringify(paramJson),
+			  dataType: 'json',
+			  contentType: 'application/json',
+			  success: function(result){
+				  if(result.success){
+					  layer.msg("修改成功");
+					  parent.$("#closeIframe").val("update");
+					  closeLayer(500);
+				  }else{
+					  layer.msg("修改失败:"+result.msg);
+					  $('#updateForm').bootstrapValidator('disableSubmitButtons', false);
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+				  $('#updateForm').bootstrapValidator('disableSubmitButtons', false);
+              }
+		});
+	}
+	if ($("#indicGrade").val() == "0") {
+		var str = "";
+		str += "<option value='0' selected>一级</option>";
+		str += "<option value='1'>二级</option>";
+		$("#indic").html(str);
+	} else if($("#indicGrade").val() == "1"){
+		var str = "";
+		str += "<option value='0' >一级</option>";
+		str += "<option value='1' selected>二级</option>";
+		$("#indic").html(str);
+	}
+	//查询id和指标名称
+	$.ajax({
+		type : 'POST',
+		url : "/api/credit/xygl-indicators/findByIdName",
+		dataType : 'json',
+		async : false,//ajax发送同步请求
+		contentType : 'application/json',
+		success : function(result) {
+			var str = "";
+			str += "<option value=''>请选择</option>";
+			for (var i = 0; i < result.data.length; i++) {
+				//比对父级指标和id是否相等，若相等默认被选中
+				if ($("#parentId").val() == result.data[i][0]) {
+					str += "<option value='"+ result.data[i][0] +"' selected>"
+							+ result.data[i][1] + "</option>";
+				} else {
+					str += "<option value='"+ result.data[i][0] +"'>"
+							+ result.data[i][1] + "</option>";
+				}
+			}
+			$("#fjzb").html(str);
+		},
+
+	});
+	function jibie(obj) {
+		//获取到select选择框里的值，给pindic_id赋值
+		var value = obj.options[obj.selectedIndex].value;
+		$("#indicGrade").val(value);
+	}
+
+	function selectOnchang(obj) {
+		//获取到select选择框里的值，给pindic_id赋值
+		var value = obj.options[obj.selectedIndex].value;
+		$("#parentId").val(value);
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/manage-header.html">
+	<script src="${staticUrl}libs/bootstrap-3.3.7-dist/js/bootstrap-table-data.js"></script>
+    <title>列表页</title>
+</head>
+<body>
+    <div class="pt-page">
+        <!-- 头部条 -->
+ 		<#include "/common/manage-topbar.html">
+        <!-- 头部条  结束 -->
+        <!--页面中间主体部分-->
+        <div class="pt-root-container">
+        	<input type="hidden" id="closeIframe"> 
+            <!--左侧菜单-->
+            <div class="pt-nav pt-open">
+                <!--菜单头部点击条-->
+                <div class="pt-bar" id="pt-bar">
+                    <img src="${staticUrl}src/images/Group15.png" alt="">
+                </div>
+                <!--菜单列表-->
+				<#include "/common/manage-menu.html">
+            </div>
+            <!--左侧菜单 结束-->
+            <!--主视口 -->
+            <div class="pt-view pt-open">
+                <div class="pt-main pt-padding">
+                    <!--搜索条-->
+                    <#include "manage-search.html">
+                    <!--内容区容器-->
+                    <div class="pt-main">
+                        <!--bootstrap 表格-->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-wrap">
+                                    <!--<table id="table_js_2"  ></table>-->
+                                    <table id="tb_info"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--主视口 结束-->
+        </div>
+        <!--公共底部-->
+		<#include "/common/manage-footer.html">
+    </div>
+</body>
+<script type="text/javascript">
+    //参数请求地址
+    var baseUrl3 = 'credit/xygl-modela';
+    var baseUrl='credit/xygl-model';
+    var baseApiUrl='api/'+baseUrl;
+    
+  //配置按钮
+    function confItem() {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-配置</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: "credit/xygl-indicatorsystem/conf" //如果不想出现滚动条['content.html', 'no']
+        });
+    }
+  //明细按钮
+    function detailItem(id) {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-明细</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: 'credit/xygl-modela/detail',//如果不想出现滚动条['content.html', 'no']
+            success: function (layero, index) {//向子页面传参
+                // 获取子页面的iframe
+                var iframe = window['layui-layer-iframe' + index];
+                // 向子页面的全局函数child传参
+                iframe.child(id);
+            }
+        });
+    }
+
+    // 删除按钮触发方法
+    function deleteItem(id) {
+		layer.confirm('确认删除？', {
+			btn : [ '确认' ]
+		}, function() {
+			$.ajax({
+			  type: 'DELETE',
+			  url: baseApiUrl+"/"+id,
+			  dataType: 'json',
+			  contentType: 'application/json',
+			  success: function(result){
+				  if(result.success){
+					  layer.msg("删除成功");
+					  tableInit();
+				  }else{
+					  layer.msg("删除失败:"+result.msg);
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+         	  }
+			});
+		});
+
+		
+    }
+    // 添加按钮触发方法
+    function addItem() {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-添加</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: baseUrl3+'/add', //如果不想出现滚动条['content.html', 'no']
+            end:closeIframe
+        });
+    }
+    // 编辑按钮触发方法
+    function editItem(id) {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-编辑</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: baseUrl3+'/update/'+id, //如果不想出现滚动条['content.html', 'no']
+            end:closeIframe
+        });
+    }
+
+    //查看按钮触发方法
+    function lookItem(id) {
+        layer.open({
+            type: 2, //0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+            title: '<span class="text-color">操作-查看</span>', //请修改span中间的内容
+            shadeClose: true, //开启阴影关闭
+            closeBtn: 1, //不显示关闭按钮
+            shade: 0.6,
+            maxmin: false, //开启最大化最小化按钮
+            area: ['62.5%', '83%'], //此处可以改为100%，该数值按UI图比例算出
+            content: baseUrl3+'/view/'+id //如果不想出现滚动条['content.html', 'no']
+        });
+    }
+    //Iframe关闭之后的操作
+    function closeIframe(){
+    	var closeIframe = $("#closeIframe").val();
+    	if(closeIframe==''){
+    		return ;
+    	}
+    	$("#closeIframe").val("");
+    	tableInit();
+    }
+    //刷新table
+    function refreshTable(){
+    	//$("#tb_info").bootstrapTable('refresh',{ pageNumber:1});
+    	//点击搜索获取搜索框里的数据
+    	var modelName = $('input[name="modelName"]').val();
+    	//判断搜索栏是否为空
+    	if(modelName==""){
+    		layer.msg("请输入模型名称");
+    	}else{
+    		//获取表格数据
+        	var stateAll = []; //table数据集合
+        	var state1 = null; //单项结果集
+    		$.ajax({
+  			  type: 'POST',
+  			  url: '/api/credit/xygl-model/findXyglModelRiskAll',
+  			  dataType: 'json',
+  			  contentType: 'application/json',
+  			  data: modelName,
+  			  success: function(result){
+  				  if(result.length>0){
+  					for(var i=0;i<result.length;i++){
+						  state1 = {
+		    						"id":result[i][0],
+		    						"modelType":result[i][1],
+		    						"modelName":result[i][2],
+		    						"modelCode":result[i][3],
+		    						"modelSource":result[i][4],
+		    						"modelDesc":result[i][5],
+		    						"modelVersion":result[i][6],
+		    						"modelStatus":result[i][7],
+		    						"firmType":result[i][8]
+		    				}
+		    				 stateAll.push(state1);
+					  }
+  					tabInit(stateAll);
+  				  }else{
+  					  layer.msg("请输入正确的模型名称");
+  				  }
+  			  },
+  			});
+    	}
+    }
+    $(function(){
+    	tableInit();
+    })
+    function tableInit() {
+    	//new TableInit().Init(baseApiUrl+'/list', columns);
+    	//获取表格数据
+    	var stateAll = []; //table数据集合
+    	var state1 = null; //单项结果集
+    	$.ajax({
+    		type : 'POST',
+    		url : "/api/credit/xygl-model/findXyglModelRisk",
+    		contentType : 'application/json',
+    		success : function(result) {
+    			for(var i=0;i<result.length;i++){
+    				 state1 = {
+    						"id":result[i][0],
+    						"modelType":result[i][1],
+    						"modelName":result[i][2],
+    						"modelCode":result[i][3],
+    						"modelSource":result[i][4],
+    						"modelDesc":result[i][5],
+    						"modelVersion":result[i][6],
+    						"modelStatus":result[i][7],
+    						"firmType":result[i][8]
+    				}
+    				 stateAll.push(state1);
+    			}
+    			 tabInit(stateAll);
+    		}
+    	});
+    };
+    
+    function tabInit(stateAll){
+    	//绘制表格
+   	 $("#tb_info").bootstrapTable('destroy').bootstrapTable({
+   		pagination: true,
+			data: stateAll,
+			columns:[
+			{
+				field: 'id',
+				visible: false
+			},{
+				field: 'modelName',
+				title: '模型名称',
+				sortable: true
+			},{
+				field: 'modelCode',
+				title: '模型编码',
+				sortable: true
+			},{
+				field: 'modelVersion',
+				title: '模型版本',
+				sortable: true
+			},{
+				field: 'modelSource',
+				title: '模型来源',
+				sortable: true ,
+			},{
+				field: 'modelDesc',
+				title: '模型描述',
+				sortable: true
+			},{
+				field: 'modelStatus',
+				title: '模型状态',
+				sortable: true,
+				formatter:function(value,row,index){
+					if( value=="0" ){
+						return "停用";
+					} else if(value=="1") {
+						return "启用";
+					}
+				}
+			},{
+				field: 'methods',
+				title: '操作',
+				formatter:function(value, row, index){
+					return [
+				            '<button type="button" class="RoleOflook btn btn-xs btn-default btn-link" onclick="lookItem(\'' + row.id +'\')">查看</button>',
+				            '<button type="button" class="RoleOfdetail btn btn-xs btn-default btn-link" onclick="detailItem(\'' + row.id +'\')">明细</button>',
+				            '<button type="button" class="RoleOfedit btn btn-xs btn-default btn-link" onclick="editItem(\'' + row.id +'\')">修改</button>',
+				            '<button type="button" class="RoleOfdelete btn btn-xs btn-default btn-link-red" onclick="deleteItem(\'' + row.id + '\')">删除</button>'
+				        ].join('');
+				}
+			}]
+   	});
+   }
+    
+    function fanhuiItem(){
+    	//清空输入框内容
+    	$('input[name="modelName"]').val('');
+    	//初始化表格
+    	tableInit();
+    }
+</script>
+
+</html>

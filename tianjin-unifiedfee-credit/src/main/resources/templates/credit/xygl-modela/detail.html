@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<#include "/common/manage-header.html">
+<title>明细页</title>
+</head>
+<body>
+	<br>
+	<br>
+	<br>
+	<div class="container">
+		  <div class="row clearfix" style="float:right">
+			<!-- 树 -->
+			<div class="pt-aside pt-aside-border">
+				<div class="pt-tree-title">
+					<span>指标</span>		
+				</div>
+				<div id="tree"></div>
+			</div>
+			<div style="margin:-40px 350px 0px 35px">
+			<button type="button" class="btn btn-default btn-primary active" onclick="save()">添加</button>
+			<button type="button" class="btn btn-default btn-primary active" onclick="del()">删除</button>
+			</div>
+			<div style="margin-left:180px"> 
+				<div id="tree2"></div>
+			</div>
+		   </div>
+	</div>
+	<br>
+	<br>
+	<br>
+</body>
+<script>
+var modid;
+function child(id) {
+	modid = id;
+	  init();
+  } 
+
+
+	$(function() {
+		$.ajax({
+			type : "Post",
+			url : "api/credit/xygl-model/getTree",
+			dataType : "json",
+			success : function(result) {
+		        $('#tree').treeview({
+		            data: result,     // data is not optional
+		            icon: "glyphicon glyphicon-stop",
+		            color: "#000000",
+		            backColor: "#FFFFFF",
+		            // selectable: true,
+		            highlightSelected: false,
+		            levels: 1,
+		            state: {
+		                checked: true,
+		                disabled: true,
+		                expanded: true,
+		                selected: true
+		            },
+		            tags: ['available'],
+		            showCheckbox:true,
+		            multiSelect: true,
+//		                uncheckedIcon:"glyphicon glyphicon-unchecked",
+		            showTags:true,
+		            onNodeSelected:function (event, data) {		            	
+		            },
+		            onNodeChecked:nodeChecked ,
+		            onNodeUnchecked:nodeUnchecked,
+
+		        });
+
+		    },
+		    function (error) {
+		        console.log("ERROR")
+		    }
+		})
+		// checkbox checked start
+		    var nodeCheckedSilent = false;
+		    function nodeChecked (event, node){
+		        if(nodeCheckedSilent){
+		            return;
+		        }
+		        nodeCheckedSilent = true;
+		        checkAllParent(node);
+		        checkAllSon(node);
+		        nodeCheckedSilent = false;
+		    }
+
+		    var nodeUncheckedSilent = false;
+		    function nodeUnchecked  (event, node){
+		        if(nodeUncheckedSilent)
+		            return;
+		        nodeUncheckedSilent = true;
+		        uncheckAllParent(node);
+		        uncheckAllSon(node);
+		        nodeUncheckedSilent = false;
+		    }
+
+		//选中全部父节点
+		    function checkAllParent(node){
+		        $('#tree').treeview('checkNode',node.nodeId,{silent:true});
+		        var parentNode = $('#tree').treeview('getParent',node.nodeId);
+		        if(!("nodeId" in parentNode)){
+		            return;
+		        }else{
+		            checkAllParent(parentNode);
+		        }
+		    }
+		//取消全部父节点
+
+		    function uncheckAllParent(node){
+		        $('#tree').treeview('uncheckNode',node.nodeId,{silent:true});
+		        var siblings = $('#tree').treeview('getSiblings', node.nodeId);
+		        var parentNode = $('#tree').treeview('getParent',node.nodeId);
+		        if(!("nodeId" in parentNode)) {
+		            return;
+		        }
+		        var isAllUnchecked = true;  //是否全部没选中
+		        for(var i in siblings){
+		            if(siblings[i].state.checked){
+		                isAllUnchecked=false;
+		                break;
+		            }
+		        }
+		        if(isAllUnchecked){
+		            uncheckAllParent(parentNode);
+		        }
+
+		    }
+
+		//级联选中所有子节点
+		    function checkAllSon(node){
+		        $('#tree').treeview('checkNode',node.nodeId,{silent:true});
+		        if(node.nodes!=null&&node.nodes.length>0){
+		            for(var i in node.nodes){
+		                checkAllSon(node.nodes[i]);
+		            }
+		        }
+		    }
+		//级联取消所有子节点
+		    function uncheckAllSon(node){
+		        $('#tree').treeview('uncheckNode',node.nodeId,{silent:true});
+		        if(node.nodes!=null&&node.nodes.length>0){
+		            for(var i in node.nodes){
+		                uncheckAllSon(node.nodes[i]);
+		            }
+		        }
+		    }
+		
+	})
+	//保存模型 树结构------
+	function save(){
+		
+	//    console.log("node:",$('#tree').treeview('getChecked'));
+	    let nodes= $('#tree').treeview('getChecked');
+	    if(nodes.length>0){
+	    let mdList=[]
+	    for(let i=0;i<nodes.length;i++){
+	        if(nodes[i].id==''||nodes[i].id==undefined){
+	            continue;
+	        }
+	        
+	        var xyglModeldetail ={};
+	        xyglModeldetail.modelId=modid;
+	        xyglModeldetail.indicateId=nodes[i].id;
+	        xyglModeldetail.indicateName=nodes[i].text;
+	        xyglModeldetail.parentIndicId=nodes[i].pid; 
+	        
+	        mdList.push(xyglModeldetail);
+	    }
+	//    console.log("111"+nodesArr);
+		var paramTools = {"mdList":mdList,"model_id":modid}
+		//保存节点形成体系
+		$.ajax({
+			type : "Post",
+			url : "api/credit/xygl-modeldetail/addModel",
+			contentType :'application/json',
+			data : JSON.stringify(paramTools),
+	//		data : {"idsArr":idsArr.toString(idsArr),"textArr":textArr.toString(textArr),"pidArr":pidArr.toString(pidArr)},
+			dataType : "json",
+			success : function(result) {
+				if(result.data.length>0){
+					  layer.msg("添加成功");
+					  init();
+				  }else{
+					  layer.msg("添加重复");
+				  }
+			  },
+			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+             }
+		})
+	    }else{
+	    	layer.msg("请选择要添加的内容");
+	    }				
+	}
+	
+	
+		
+
+	 //模型树结构   -------- 
+	function init(){
+	$.ajax({
+			type : "Post",
+			url : "api/credit/xygl-model/getTreeM",
+			data:{"model_id":modid},
+			dataType : "json",
+			success : function(result) {
+		        $('#tree2').treeview({
+							data : result, // 数据源
+							showCheckbox : true, //是否显示复选框
+
+							multiSelect : false, //多选
+							onNodeChecked : function(event, node) {
+
+								var selectNodes = getChildNodeIdArr(node); //获取所有子节点
+								if (selectNodes) { //子节点不为空，则选中所有子节点
+									$('#tree2').treeview(
+											'checkNode', [ selectNodes, {
+												silent : true
+											} ]);
+								}
+								var parentNode = $("#tree2")
+										.treeview("getNode", node.parentId);
+								setParentNodeCheck(node);
+							},
+							onNodeUnchecked : function(event, node) { //取消选中节点
+								var selectNodes = getChildNodeIdArr(node); //获取所有子节点
+								if (selectNodes) { //子节点不为空，则取消选中所有子节点
+									$('#tree2').treeview(
+											'uncheckNode', [ selectNodes, {
+												silent : true
+											} ]);
+								}
+							},
+							onNodeExpanded : function(event, data) {
+								if (data.nodes === undefined
+										|| data.nodes === null) {
+
+								} else if (data.tags[0] === "2") {
+									alert("Tags 2");
+								} else {
+									alert("1111");
+								}
+
+								 
+								 if(node.nodes !=null){
+								     $.each(node.nodes,function (index,value) {
+								         $('#tree2').treeview('checkNode',value.nodeId,{
+								             silent:true
+								         })
+								     })
+								 } else {
+								     // 父节点
+								     var parentNode = $('#tree2').treeview('getParent', node.nodeId);
+								     var isAllchecked = true; // 是否全部选中
+
+								     var siblings = $('#tree2').treeview('getSiblings', node.nodeId);
+								     for ( var i in siblings) {
+								         // 有一个没选中，则不是全选
+								         if (!siblings[i].state.checked) {
+								             isAllchecked = false;
+								             break;
+								         }
+								     }
+								     // 全选，则打钩
+								     if (isAllchecked) {
+								         $('#tree2').treeview('checkNode', parentNode.nodeId, {
+								             silent : true
+								         });
+								     } else {// 非全选，则变红
+								         $('#tree2').treeview('selectNode', parentNode.nodeId, {
+								             silent : true
+								         });
+								     }
+								 }
+								},
+								
+								onNodeUnchecked : function(event, node) {
+								silentByChild = true;
+								// 选中的是省级节点
+								if (node.nodes != null) {
+								    // 这里需要控制，判断是否是因为市级节点引起的父节点被取消选中
+								    // 如果是，则只管取消父节点就行了
+								    // 如果不是，则子节点需要被取消选中
+								    if (silentByChild) {
+								        $.each(node.nodes, function(index, value) {
+								        	$('#tree2').treeview('uncheckNode', value.nodeId, {
+								                silent : true
+								            })
+								        })
+								    }
+								} else {
+								    // 市级节点被取消选中
+
+								    var parentNode = $('#tree2').treeview('getParent', node.nodeId);
+
+								    var isAllUnchecked = true; // 是否全部取消选中
+
+								    // 市级节点有一个选中，那么就不是全部取消选中
+								    var siblings = $('#tree2').treeview('getSiblings', node.nodeId);
+								    for ( var i in siblings) {
+								        if (siblings[i].state.checked) {
+								            isAllUnchecked = false;
+								            break;
+								        }
+								    }
+
+								    // 全部取消选中，那么省级节点恢复到默认状态
+								    if (isAllUnchecked) {
+								    	$('#tree2').treeview('unselectNode', parentNode.nodeId, {
+								            silent : true,
+								        });
+								    	$('#tree2').treeview('uncheckNode', parentNode.nodeId, {
+								            silent : true,
+								        });
+								    } else {
+								        silentByChild = false;
+								        $('#tree2').treeview('selectNode', parentNode.nodeId, {
+								            silent : true,
+								        });
+								        $('#tree2').treeview('uncheckNode', parentNode.nodeId, {
+								            silent : true,
+								        });
+								    }
+								}  
+							}
+						});
+			},
+			error : function() {
+				alert("加载失败！")
+			}
+		});
+	}
+
+	function getChildNodeIdArr(node) {
+		var ts = [];
+		if (node.nodes) {
+			for (x in node.nodes) {
+				ts.push(node.nodes[x].nodeId);
+				if (node.nodes[x].nodes) {
+					var getNodeDieDai = getChildNodeIdArr(node.nodes[x]);
+					for (j in getNodeDieDai) {
+						ts.push(getNodeDieDai[j]);
+					}
+				}
+			}
+		} else {
+			ts.push(node.nodeId);
+		}
+		return ts;
+	}
+
+	function setParentNodeCheck(node) {
+		var parentNode = $("#tree2").treeview("getNode", node.parentId);
+		if (parentNode.nodes) {
+			var checkedCount = 0;
+			for (x in parentNode.nodes) {
+				if (parentNode.nodes[x].state.checked) {
+					checkedCount++;
+				} else {
+					break;
+				}
+			}
+			if (checkedCount === parentNode.nodes.length) {
+				$("#tree2").treeview("checkNode", parentNode.nodeId);
+				setParentNodeCheck(parentNode);
+			}
+		}
+	}
+
+	
+
+    //模型删除指标---------
+    function del(){
+    	//    console.log("node:",$('#tree').treeview('getChecked'));
+    	    let nodes= $('#tree2').treeview('getChecked');
+    	    if(nodes.length>0){
+    	    	let ids=[];
+        	    for(let i=0;i<nodes.length;i++){
+        	        if(nodes[i].id==''||nodes[i].id==undefined){
+        	            continue;
+        	        }
+        	        ids.push(nodes[i].id);
+        	    }
+        	//    console.log("111"+nodesArr);
+        		$.ajax({
+        			type : "Post",
+        			url : "api/credit/xygl-modeldetail/delModel",
+        			data : {"ids":ids.toString(ids),"model_id":modid},
+        			dataType : "json",
+        			success : function(result) {
+        				 if(result.success){
+        					  layer.msg("删除成功");
+        					  init();
+        					 
+        				  }else{
+        					  layer.msg("删除失败:"+result.msg);
+        				  }
+        			  },
+        			  error: function (XMLHttpRequest, textStatus, errorThrown) {
+        				  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+                     }
+        		})
+    	    }else{
+    	    	layer.msg("请选择要删除的内容");
+    	    }
+    	}
+</script>
+
+
+</html>

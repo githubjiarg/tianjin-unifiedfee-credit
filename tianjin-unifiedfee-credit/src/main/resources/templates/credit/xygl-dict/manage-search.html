@@ -1,0 +1,28 @@
+<!--搜索条-->
+<div class="pt-section-search">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="form-inline">
+            	<div class="form-group ">
+                    <label for="category">业务类别</label>
+                    <input type="text" data-condition="eq" class="form-control pt-input-append pt-manage-search" name="category" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="queryResoult">起始分值</label>
+                    <input type="number" data-condition="eq" class="form-control pt-input-append pt-manage-search" name="startnum" placeholder="">
+                </div>
+                <div class="form-group ">
+                    <label for="queryResoult">结束分值</label>
+                    <input type="number" data-condition="eq" class="form-control pt-input-append pt-manage-search" name="endnum" placeholder="">
+                </div>
+                <input type="hidden" data-condition="eq" name="isDlete" value="0" class="form-control pt-input-append pt-manage-search">
+                <div class="form-group">
+                    <button type="button" onclick="refreshTable();" class="btn btn-primary w120">搜索</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 column pt-btn-line">
+        	<button type="button"  onclick="addItem();" class="btn w120 btn-default btn-primary">新增</button>
+        </div>
+    </div>
+</div>

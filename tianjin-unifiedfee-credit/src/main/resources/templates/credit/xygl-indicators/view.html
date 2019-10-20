@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/view-header.html">
+    <title>查看页</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <div class="row clearfix">
+  	<div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">指标名称 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.indicName!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">指标级别 ：</label>
+      <div id="jibie" class="col-sm-10 pt-look-text">${model.indicGrade!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">数据来源 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.dataSource!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">父级指标 ：</label>
+      <div id="fujizhibiao" class="col-sm-10 pt-look-text">${model.parentId!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">x脚本：</label>
+      <div class="col-sm-10 pt-look-text">${model.indicScript!}</div>
+    </div>
+    <div class="col-md-12 column h40 ">
+      <label class="col-sm-2 pt-look-title">指标描述 ：</label>
+      <div class="col-sm-10 pt-look-text">${model.indicDesc!}</div>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+</body>
+<script type="text/javascript">
+	//获取父级指标id的信息
+	var a = document.getElementById("fujizhibiao").innerText;
+	if (a != "") {
+		$.ajax({
+			type : 'POST',
+			url : "/api/credit/xygl-indicators/findByName",
+			contentType : 'application/json',
+			data : a,
+			success : function(result) {
+				$("#fujizhibiao").empty();
+			 	document.getElementById("fujizhibiao").innerHTML = result; 	
+			}
+		});
+	} else {
+		document.getElementById('fujizhibiao').innerHTML = '';
+	}
+
+
+	var b = ${model.indicGrade!};
+	if(b=="0"){
+		$("#jibie").html("一级");
+	}else if(b=="1"){
+		$("#jibie").html("二级");
+	}
+</script>
+</html>

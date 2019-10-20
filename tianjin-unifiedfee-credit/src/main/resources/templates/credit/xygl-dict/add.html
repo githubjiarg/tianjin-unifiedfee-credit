@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<#include "/common/add-header.html">
+    <title>添加页</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <div class="row clearfix">
+    <div class="col-md-12 column">
+      <form id="addForm" class="form-horizontal pt-form-full" role="form">
+      	<div class="form-group">
+          <label class="col-sm-2 control-label" for="category">业务类别</label>
+          <div class="col-sm-10">
+            <input maxlength="50" type="text" class="form-control" name="category" id="category" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="startnum">起始分值</label>
+          <div class="col-sm-10">
+            <input maxlength="5" type="number" class="form-control" name="startnum" id="startnum" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="endnum">结束分值</label>
+          <div class="col-sm-10">
+            <input maxlength="5" type="number" class="form-control" name="endnum" id="endnum" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="queryResoult">查询结果</label>
+          <div class="col-sm-10">
+            <input maxlength="200" type="text" class="form-control" name="queryResoult" id="queryResoult" />
+          </div>
+        </div>
+        <div class="form-group pt-btn-submit">
+        <div class="col-sm-2"></div><!-- 占位2格 -->
+          <button type="submit" class="btn w160 btn-lg btn-default btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<script>
+	//参数请求地址
+	var baseUrl='credit/xygl-dict';
+	var baseApiUrl='api/'+baseUrl;
+    $(function () {
+        $('#addForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+            }
+        }).on('success.form.bv', function(e) {
+			submit();
+			e.preventDefault();
+			$('#addForm').bootstrapValidator('disableSubmitButtons', true);
+        });
+    });
+	function submit() {
+		var paramJson = $('#addForm').serializeJSON();
+		if( checkInput() ){
+			$.ajax({
+				  type: 'POST',
+				  url: baseApiUrl,
+				  data: JSON.stringify(paramJson),
+				  dataType: 'json',
+				  contentType: 'application/json',
+				  success: function(result){
+					  if(result.success){
+						  layer.msg("添加成功");
+						  parent.$("#closeIframe").val("add");
+						  closeLayer(500);
+					  }else{
+						  layer.msg("添加失败:"+result.msg);
+						  $('#addForm').bootstrapValidator('disableSubmitButtons', false);
+					  }
+				  },
+				  error: function (XMLHttpRequest, textStatus, errorThrown) {
+					  layer.msg("服务异常"+XMLHttpRequest.responseJSON.code);
+					  $('#addForm').bootstrapValidator('disableSubmitButtons', false);
+	              }
+			});
+		}
+	}
+	/** 校验数据非空 */
+	function checkInput(){
+		var category = $("input[name='category']").val().trim();
+		if( category.length==0 ){
+			layer.msg("业务类别分值不能为空",{time:2000});
+			$("input[name='category']").focus();
+			return false;
+		}
+		var startnum = $("input[name='startnum']").val().trim();
+		if( startnum.length==0 ){
+			layer.msg("起始分值不能为空",{time:2000});
+			$("input[name='startnum']").focus();
+			return false;
+		}
+		var endnum = $("input[name='endnum']").val().trim();
+		if( endnum.length==0 ){
+			layer.msg("结束分值不能为空",{time:2000});
+			$("input[name='endnum']").focus();
+			return false;
+		}
+		var queryResoult = $("input[name='queryResoult']").val().trim();
+		if( queryResoult.length==0 ){
+			layer.msg("查询结果不能为空",{time:2000});
+			$("input[name='queryResoult']").focus();
+			return false;
+		}
+		return true;
+	}
+</script>
+</body>
+</html>
